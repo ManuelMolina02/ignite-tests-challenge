@@ -13,7 +13,13 @@
 
 ## /profile
     - deve retornar a busca do perfil de usuário
-    - permitir visualização apenas para usuário autenticado  
+    - permitir visualização apenas para usuário autenticado
+
+## /statement
+    - deve criar um depósito
+    - deve criar um retirada
+
+    - o depósito só poderá ser criado por um usuário autenticado
 
 APPLICATION ROUTES
 
@@ -22,7 +28,7 @@ APPLICATION ROUTES
             testes ==> deve criar um usuário
                        não deve criar dois usuários com o mesmo email
 
-    - USER PROFILE
+    - USER PROFILE [ok]
         - get profile -> visualizar perfil
 
     - STATEMENTS
