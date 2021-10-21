@@ -1,7 +1,8 @@
 import { AppError } from "../../../../shared/errors/AppError";
 import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUsersRepository";
-import { AuthenticateUserUseCase } from "../authenticateUser/AuthenticateUserUseCase";
+
 import { CreateUserUseCase } from "../createUser/CreateUserUseCase";
+import { AuthenticateUserUseCase } from "../authenticateUser/AuthenticateUserUseCase";
 import { ShowUserProfileUseCase } from "./ShowUserProfileUseCase";
 
 let createUserUseCase: CreateUserUseCase;
@@ -38,6 +39,6 @@ describe("Show User Profile", () => {
 
             await showUserProfileUseCase.execute(`error+${user.id as string}`);
 
-        }).rejects.toBeInstanceOf(AppError);
+        }).rejects.toEqual(new AppError('User not found', 404))
     });
 });

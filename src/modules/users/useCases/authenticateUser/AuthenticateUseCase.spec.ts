@@ -1,14 +1,19 @@
-import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUsersRepository";
-import { CreateUserUseCase } from '../createUser/CreateUserUseCase'
-import { AppError } from '../../../../shared/errors/AppError'
+import { AppError } from "../../../../shared/errors/AppError";
 import { ICreateUserDTO } from "../createUser/ICreateUserDTO";
+import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUsersRepository";
 
+import { CreateUserUseCase } from '../createUser/CreateUserUseCase'
 import { AuthenticateUserUseCase } from './AuthenticateUserUseCase'
 
 let authenticateUserUseCase: AuthenticateUserUseCase;
 let inMemoryUsersRepository: InMemoryUsersRepository;
 let createUserUseCase: CreateUserUseCase;
 
+const userFake: ICreateUserDTO = {
+    name: 'name test',
+    email: 'emailtest@email.com',
+    password: '123456'
+}
 
 describe('Authenticate User', () => {
     beforeEach(() => {
@@ -18,17 +23,12 @@ describe('Authenticate User', () => {
     })
 
     it('should be able an authenticate an user', async () => {
-        const user: ICreateUserDTO = {
-            name: 'name test',
-            email: 'emailtest@email.com',
-            password: '123456'
-        }
 
-        await createUserUseCase.execute(user)
+        await createUserUseCase.execute(userFake)
 
         const result = await authenticateUserUseCase.execute({
-            email: user.email,
-            password: user.password,
+            email: userFake.email,
+            password: userFake.password,
         })
 
         expect(result).toHaveProperty('token');
@@ -40,25 +40,19 @@ describe('Authenticate User', () => {
                 email: 'user.email',
                 password: 'kakaka',
             }),
-        ).rejects.toBeInstanceOf(AppError);
+        ).rejects.toEqual(new AppError('Incorrect email or password', 401));
     })
 
     it('should not be able to authenticate with incorrect password', async () => {
         expect(async () => {
-            const user: ICreateUserDTO = {
-                name: 'name test',
-                email: 'emailtest@email.com',
-                password: '123456'
-            }
 
-            await createUserUseCase.execute(user)
+            await createUserUseCase.execute(userFake)
 
             await authenticateUserUseCase.execute({
-                email: user.email,
+                email: userFake.email,
                 password: '1234',
             })
-        }).rejects.toBeInstanceOf(AppError)
+        }).rejects.toEqual(new AppError('Incorrect email or password', 401))
     })
-
 
 });

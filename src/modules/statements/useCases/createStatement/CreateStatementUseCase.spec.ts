@@ -1,10 +1,11 @@
+import { AppError } from "../../../../shared/errors/AppError";
 import { InMemoryUsersRepository } from "../../../users/repositories/in-memory/InMemoryUsersRepository";
 import { InMemoryStatementsRepository } from "../../repositories/in-memory/InMemoryStatementsRepository";
-import { CreateStatementUseCase } from "./CreateStatementUseCase";
+import { ICreateStatementDTO } from "./ICreateStatementDTO";
 import { OperationType } from "../../entities/Statement";
 
-import { ICreateStatementDTO } from "./ICreateStatementDTO";
-import { CreateStatementError } from "./CreateStatementError";
+import { CreateStatementUseCase } from "./CreateStatementUseCase";
+
 
 let createStatementUseCase: CreateStatementUseCase;
 let inMemoryUsersRepository: InMemoryUsersRepository;
@@ -56,8 +57,6 @@ describe('Create Statement', () => {
 
         await createStatementUseCase.execute(depositStatement)
 
-
-
         const withdrawStatement: ICreateStatementDTO = {
             user_id: user.id as string,
             description: 'description statement',
@@ -66,8 +65,6 @@ describe('Create Statement', () => {
         }
 
         const withdraw = await createStatementUseCase.execute(withdrawStatement);
-
-        console.log(withdraw)
 
         expect(withdraw).toHaveProperty('id')
         expect(withdraw.type).toEqual('withdraw')
@@ -85,8 +82,36 @@ describe('Create Statement', () => {
             }
 
             await createStatementUseCase.execute(depositStatement)
-        }).rejects.toBeInstanceOf(CreateStatementError.UserNotFound)
+        }).rejects.toEqual(new AppError('User not found', 404))
+
+    })
+
+    it('should not be able to make a withdrawal if the balance is insufficient', async () => {
+        expect(async () => {
+            const user = await inMemoryUsersRepository.create(userFake)
+
+            const depositStatement: ICreateStatementDTO = {
+                user_id: user.id as string,
+                description: 'description statement',
+                amount: 150,
+                type: OperationType.DEPOSIT
+            }
+
+            await createStatementUseCase.execute(depositStatement)
+
+            const withdrawStatement: ICreateStatementDTO = {
+                user_id: user.id as string,
+                description: 'description statement',
+                amount: 250,
+                type: OperationType.WITHDRAW
+            }
+    
+            await createStatementUseCase.execute(withdrawStatement);
+            
+        }).rejects.toEqual(new AppError('Insufficient funds', 400))
 
     })
 })
+
+
 
